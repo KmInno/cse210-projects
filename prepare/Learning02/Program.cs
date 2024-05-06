@@ -2,20 +2,20 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-// defining the variable to be used in the journal program
 class Record
 {
-    public string question;
-    public string answer;
-    public string Date;
+    public string _date;
+    public string _promptText;
+    public string _entryText;
 }
-// starting the main program
+
 class Journal
 {
-    // main login of the journal programe
+    private List<Record> _entries = new List<Record>();
+
     static void Main(string[] args)
     {
-        List<Record> journal = new List<Record>();
+        Journal journal = new Journal();
         string choice;
         do
         {
@@ -30,16 +30,16 @@ class Journal
             switch (choice)
             {
                 case "1":
-                    WriteNewEntry(journal);
+                    journal.WriteNewEntry();
                     break;
                 case "2":
-                    DisplayJournal(journal);
+                    journal.DisplayJournal();
                     break;
                 case "3":
-                    SaveJournal(journal);
+                    journal.SaveJournal();
                     break;
                 case "4":
-                    LoadJournal(journal);
+                    journal.LoadJournal();
                     break;
                 case "5":
                     Environment.Exit(0);
@@ -51,65 +51,55 @@ class Journal
 
         } while (choice != "5");
     }
-// getting reposnce from the user of journal program
-    static void WriteNewEntry(List<Record> journal)
+
+    void WriteNewEntry()
     {
-        string[] questions = {
-            "Who was the most interesting person I interacted with today?",
-            "What was the best part of my day?",
-            "How did I see the hand of the Lord in my life today?",
-            "What was the strongest emotion I felt today?",
-            "If I had one thing I could do over today, what would it be?",
-        };
+        PromptGenerator promptGenerator = new PromptGenerator();
+        string randomPrompt = promptGenerator.GetRandomPrompt();
 
-        Random random = new Random();
-        string randomQuestion = questions[random.Next(questions.Length)];
-
-        Console.WriteLine("Question: " + randomQuestion);
+        Console.WriteLine("Question: " + randomPrompt);
         Console.Write("Enter your answer: ");
-        string answer = Console.ReadLine();
+        string response = Console.ReadLine();
 
         Record entry = new Record();
-        entry.question = randomQuestion;
-        entry.answer = answer;
-        entry.Date = DateTime.Now.ToString("yyyy-MM-dd");
-        journal.Add(entry);
+        entry._promptText = randomPrompt;
+        entry._entryText = response;
+        entry._date = DateTime.Now.ToString("yyyy-MM-dd");
+        _entries.Add(entry);
     }
 
-// displaying journal entries to the user
-    static void DisplayJournal(List<Record> journal)
+    void DisplayJournal()
     {
-        foreach (Record entry in journal)
+        foreach (Record entry in _entries)
         {
-            Console.WriteLine("Date: " + entry.Date);
-            Console.WriteLine("Question: " + entry.question);
-            Console.WriteLine("Answer: " + entry.answer);
+            Console.WriteLine("Date: " + entry._date);
+            Console.WriteLine("Prompt: " + entry._promptText);
+            Console.WriteLine("Response: " + entry._entryText);
             Console.WriteLine();
         }
     }
 
-    static void SaveJournal(List<Record> journal)
+    void SaveJournal()
     {
         Console.Write("Enter filename to save: ");
         string saveFilename = Console.ReadLine();
 
         using (StreamWriter writer = new StreamWriter(saveFilename))
         {
-            foreach (Record entry in journal)
+            foreach (Record entry in _entries)
             {
-                writer.WriteLine($"{entry.Date}|{entry.question}|{entry.answer}");
+                writer.WriteLine($"{entry._date}|{entry._promptText}|{entry._entryText}");
             }
         }
         Console.WriteLine("Journal saved successfully.");
     }
 
-// loading from of the saved journal txt
-    static void LoadJournal(List<Record> journal)
+    void LoadJournal()
     {
         Console.Write("Enter the filename to load: ");
         string loadFilename = Console.ReadLine();
 
-        journal.Clear();
+        _entries.Clear();
         string[] lines = File.ReadAllLines(loadFilename);
         foreach (var line in lines)
         {
@@ -119,11 +109,11 @@ class Journal
             {
                 Record entry = new Record()
                 {
-                    Date = parts[0].Trim(),
-                    question = parts[1].Trim(),
-                    answer = parts[2].Trim()
+                    _date = parts[0].Trim(),
+                    _promptText = parts[1].Trim(),
+                    _entryText = parts[2].Trim()
                 };
-                journal.Add(entry);
+                _entries.Add(entry);
             }
             else
             {
@@ -134,3 +124,21 @@ class Journal
     }
 }
 
+class PromptGenerator
+{
+    private List<string> _prompts = new List<string>
+    {
+        "Who was the most interesting person I interacted with today?",
+        "What was the best part of my day?",
+        "How did I see the hand of the Lord in my life today?",
+        "What was the strongest emotion I felt today?",
+        "If I had one thing I could do over today, what would it be?"
+    };
+
+    public string GetRandomPrompt()
+    {
+        Random random = new Random();
+        int index = random.Next(_prompts.Count);
+        return _prompts[index];
+    }
+}
