@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
+// definig the blueprints for the jounal program
 class Record
 {
     public string _date;
@@ -9,10 +10,13 @@ class Record
     public string _entryText;
 }
 
+// the start of the main program
 class Journal
 {
     private List<Record> _entries = new List<Record>();
 
+
+// main class for the program which generate questions for the user to choose from
     static void Main(string[] args)
     {
         Journal journal = new Journal();
@@ -52,6 +56,7 @@ class Journal
         } while (choice != "5");
     }
 
+// iteraates through the questions
     void WriteNewEntry()
     {
         PromptGenerator promptGenerator = new PromptGenerator();
@@ -67,7 +72,7 @@ class Journal
         entry._date = DateTime.Now.ToString("yyyy-MM-dd");
         _entries.Add(entry);
     }
-
+// looks through the journal to display questions to the user
     void DisplayJournal()
     {
         foreach (Record entry in _entries)
@@ -79,6 +84,7 @@ class Journal
         }
     }
 
+// asking the user how they want to save their recorded journal
     void SaveJournal()
     {
         Console.Write("Enter filename to save: ");
@@ -94,6 +100,7 @@ class Journal
         Console.WriteLine("Journal saved successfully.");
     }
 
+// loads a journal from a file saved by the user
     void LoadJournal()
     {
         Console.Write("Enter the filename to load: ");
@@ -124,6 +131,7 @@ class Journal
     }
 }
 
+// making the journal program more nteresting by using random questions strategy
 class PromptGenerator
 {
     private List<string> _prompts = new List<string>
