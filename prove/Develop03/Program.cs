@@ -2,92 +2,163 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-class Scripture
+// this class represent the the words in the program
+// store the orginal words in the progrma
+// indicats wether the words are hidden or not
+// and provide a way to get the hidden words
+class Word
 {
-    // lets reference the scripture to be use in the program
-    // store the scripture text of the scripture
-    // make a list to store the words to hide
-    private string _reference;
-    private string _text;
-    private List<string> _hiddenWords;
+    private string _value;
+    private bool _isHidden;
 
-    public Scripture(string reference, string text)
+    public Word(string value)
+    {
+        _value = value;
+        _isHidden = false;
+    }
+
+    public void Hide()
+    {
+        _isHidden = true;
+    }
+
+    public void Show()
+    {
+        _isHidden = false;
+    }
+
+    public bool IsHidden()
+    {
+        return _isHidden;
+    }
+
+    public string GetValue()
+    {
+        return _value;
+    }
+
+    public string GetHiddenValue()
+    {
+        return new string('_', _value.Length);
+    }
+
+    public override string ToString()
+    {
+        return _isHidden ? GetHiddenValue() : _value;
+    }
+}
+
+
+// this class represents the reference  scripture in the program
+class Reference
+{
+    private string _reference;
+    private List<Scripture> _verses;
+
+    public Reference(string reference)
     {
         _reference = reference;
-        _text = text;
-        _hiddenWords = new List<string>();
+        _verses = new List<Scripture>();
     }
 
-    public string GetReference()
+    public void AddVerse(string text)
     {
-        return _reference;
+        _verses.Add(new Scripture(_reference, text));
     }
 
-    public string GetText()
-    {
-        return _text;
-    }
-
-// looping through the words in the verse and replacing them with underscores but determinin the number of 
-// letter in the word
     public void HideRandomWords()
     {
-        string[] words = _text.Split(' ');
-        Random random = new Random();
-        int wordsToHide = random.Next(1, words.Length / 2);
-
-        for (int i = 0; i < wordsToHide; i++)
+        foreach (var verse in _verses)
         {
-            int index = random.Next(0, words.Length);
-            _hiddenWords.Add(words[index]);
-            words[index] = new string('_', words[index].Length);
+            verse.HideRandomWords();
         }
-
-        _text = string.Join(" ", words);
     }
 
     public bool AllWordsHidden()
     {
-        return _hiddenWords.Count == _text.Split(' ').Length;
+        return _verses.All(verse => verse.AllWordsHidden());
     }
 
     public void Display()
     {
         Console.Clear();
         Console.WriteLine(_reference);
-        Console.WriteLine(_text);
+
+        foreach (var verse in _verses)
+        {
+            verse.Display();
+        }
     }
 }
 
-// create the scripture reference and the scripture txt
-//  i will loop the code untill no more words in the verses
+// this class represents a single scripture verse
+class Scripture
+{
+    private string _text;
+    private List<Word> _words;
+
+    public Scripture(string reference, string text)
+    {
+        _text = text;
+        _words = text.Split(' ').Select(word => new Word(word)).ToList();
+    }
+
+    public void HideRandomWords()
+    {
+        Random random = new Random();
+        int wordsToHide = random.Next(1, _words.Count / 2);
+
+        for (int i = 0; i < wordsToHide; i++)
+        {
+            int index = random.Next(0, _words.Count);
+            _words[index].Hide();
+        }
+    }
+
+    public bool AllWordsHidden()
+    {
+        return _words.All(word => word.IsHidden());
+    }
+
+    public void Display()
+    {
+        foreach (var word in _words)
+        {
+            Console.Write(word + " ");
+        }
+        Console.WriteLine();
+    }
+}
+
+// this class represents the whole program
+// initizes the reference object, enters a loop to display the reference and ask the user to hide words
+// until all words are hidden
+// then exit
+
 class Program
 {
     static void Main(string[] args)
     {
-        string reference = "1 Nephi 7:1-3";
-        string text = "Behold, it came to pass that I, Nephi, did cry much unto the Lord my God, because of the anger of my brethren. "
-                    + "But behold, their anger did increase against me, insomuch that they did seek to take away my life. "
-                    + "Yea, they did murmur against me, saying: Our younger brother thinks to rule over us; and we have had much trial because of him; "
-                    + "wherefore, now let us slay him, that we may not be afflicted more because of his words. "
-                    + "For behold, we will not have him to be our ruler; for it belongs unto us, who are the elder brethren, to rule over this people.";
-
-        Scripture scripture = new Scripture(reference, text);
+        Reference reference = new Reference("John 3:16");
+        reference.AddVerse("For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life.");
+        reference.AddVerse("For God did not send his Son into the world to condemn the world, but to save the world through him.");
 
         do
         {
-            scripture.Display();
+            reference.Display();
             Console.WriteLine("\nPress Enter to continue or type 'quit' to exit:");
             string input = Console.ReadLine();
 
             if (input.ToLower() == "quit")
                 break;
 
-            scripture.HideRandomWords();
+            reference.HideRandomWords();
 
-        } while (!scripture.AllWordsHidden());
+        } while (!reference.AllWordsHidden());
 
         Console.WriteLine("All words in the scripture are hidden. Press any key to exit.");
         Console.ReadKey();
     }
 }
+
+
