@@ -1,0 +1,3 @@
+EternalGoal,talk,600,0
+SimpleGoal,eating,100,False
+ChecklistGoal,running,20,0,3,50

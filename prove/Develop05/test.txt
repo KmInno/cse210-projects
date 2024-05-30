@@ -1,0 +1,4 @@
+0
+SimpleGoal,cooking,200
+EternalGoal,temple,800
+ChecklistGoal,eating,100,0
